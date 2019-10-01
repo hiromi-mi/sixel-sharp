@@ -25,22 +25,4 @@ namespace Example
             InitializeComponent();
         }
     }
-
-    public sealed class SixelBitmapDecoder : BitmapDecoder
-    {
-        private SixelBitmapDecoder()
-        {
-            // Prohibit construction without Stream
-        }
-
-        public SixelBitmapDecoder(System.IO.Stream stream)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal override void SealObject()
-        {
-            throw new NotImplementedException();
-        }
-    }
 }
