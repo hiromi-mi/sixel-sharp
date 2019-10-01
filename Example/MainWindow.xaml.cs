@@ -23,6 +23,21 @@ namespace Example
         public MainWindow()
         {
             InitializeComponent();
+
+            // https://docs.microsoft.com/ja-jp/dotnet/api/system.windows.media.imaging.bitmapsource
+            PixelFormat pf = PixelFormats.Bgr32;
+            var (width, height) = (200, 200);
+
+            // 切り上げる
+            int rawStride = (width * pf.BitsPerPixel + 7) / 8;
+            var rawImage = new byte[rawStride * height];
+
+            // randomize
+            var value = new Random();
+            value.NextBytes(rawImage);
+
+            var bitmap = BitmapSource.Create(width, height, 96, 96, pf, null, rawImage, rawStride);
+            this.sixelimage.Source = bitmap;
         }
     }
 }

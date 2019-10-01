@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:Example"
         mc:Ignorable="d"
         Title="Sixel Example" Height="450" Width="800">
-    <Image Margin="10">
+    <Image Margin="10" Name="sixelimage">
         
     </Image>
 </Window>
