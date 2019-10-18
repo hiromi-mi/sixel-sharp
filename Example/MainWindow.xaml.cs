@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
+using System.IO;
 
 
 
@@ -38,6 +40,7 @@ namespace Example
             InitializeComponent();
 
             // https://docs.microsoft.com/ja-jp/dotnet/api/system.windows.media.imaging.bitmapsource
+            /*
             PixelFormat pf = PixelFormats.Bgr32;
             var (width, height) = (200, 200);
 
@@ -58,10 +61,94 @@ namespace Example
 
             var data = new byte[stride * height];
             bitmap.CopyPixels(data, stride, 0);
+            */
 
             // Pixel Data に取り出し
+
+            var uri = new Uri("file:///Users/MizunoMidori/Pictures/キャプチャ.PNG");
+            var rawimage = JpegBitmapDecoder.Create(uri, BitmapCreateOptions.None, BitmapCacheOption.Default);
+            var raw = new SixelRawImage(rawimage.Frames[0]);
+            raw.ToString();
+        }
+
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var ofd = new OpenFileDialog();
+            ofd.Filter = "テキストファイル (*.txt)|*.txt|すべてのファイル (*.*)|*.*";
+            ofd.Title = "Open Sixel Image";
+            ofd.ShowDialog();
+            byte[] output = new byte[100000];
+            int size = 20;
+            int height = 1;
+            using (FileStream fs = File.OpenRead(ofd.FileName))
+            {
+                byte[] b = new byte[fs.Length + 1];
+                
+
+                
+                UTF8Encoding encoding = new UTF8Encoding();
+                var (x, y) = (0, 0);
+
+                Func<byte, int> writedown = abyte =>
+                {
+                    for (int k = 0; k < 6; k++)
+                    {
+                        if ((abyte & (1 << k)) > 0)
+                        {
+                            output[size * (y + k) + x] = 255;
+                        }
+                    }
+                    x += 1;
+                    return x;
+                };
+                for (int i = 3; i < fs.Read(b, 0, b.Length); i++)
+                {
+                    if (b[i] == '\u001B')
+                    {
+                        // Escape
+                        break;
+                    }
+                    if (b[i] == '-')
+                    {
+                        y += 6;
+                        x += 0;
+                        height++;
+
+                    }
+                    else if (b[i] == '!')
+                    {
+                        var cnt = b[i + 1] - '0';
+                        for (int l = 0; l < cnt; l++)
+                        {
+                            writedown(b[i + 2]);
+                        }
+                        i += 2;
+                    }
+                    else if (b[i] >= '?' && b[i] <= 63 + 64)
+                    {
+                        writedown(b[i]);
+                    }
+                    // else: just ignore
+                }
+            }
+
+            PixelFormat pf = PixelFormats.Gray8;
+
+            // 切り上げる
+            int rawStride = (size * pf.BitsPerPixel + 7) / 8;
+
+            var bitmap = BitmapSource.Create(size, height, 96, 96, pf, null, output, rawStride);
+            sixelimage.Source = bitmap;
+
+            // http://funct.hatenablog.com/entry/20150929/1443538237
+            // (size, height) = (bitmap.PixelWidth, bitmap.PixelHeight);
+            var stride = (size * bitmap.Format.BitsPerPixel + 7) / 8;
+
+            var data = new byte[stride * height];
+            bitmap.CopyPixels(data, stride, 0);
         }
     }
+
 
     public class SixelRawImage
     {

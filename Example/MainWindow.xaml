@@ -6,7 +6,14 @@
         xmlns:local="clr-namespace:Example"
         mc:Ignorable="d"
         Title="Sixel Example" Height="450" Width="800">
-    <Image Margin="10" Name="sixelimage">
-        
-    </Image>
+    <DockPanel>
+        <Menu VerticalAlignment="Top" DockPanel.Dock="Top">
+            <MenuItem Header="Open" Click="MenuItem_Click"/>
+        </Menu>
+        <Image Margin="10" Name="sixelimage">
+
+        </Image>
+        <TextBox Name="Test"></TextBox>
+    </DockPanel>
+ 
 </Window>
